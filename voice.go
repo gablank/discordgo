@@ -303,6 +303,7 @@ func (v *VoiceConnection) open() (err error) {
 	vg := "wss://" + strings.TrimSuffix(v.endpoint, ":80")
 	v.log(LogInformational, "connecting to voice endpoint %s", vg)
 	v.wsConn, _, err = websocket.DefaultDialer.Dial(vg, nil)
+	v.log(LogInformational, "connected to voice endpoint %s", vg)
 	if err != nil {
 		v.log(LogWarning, "error connecting to voice endpoint %s, %s", vg, err)
 		v.log(LogDebug, "voice struct: %#v\n", v)
@@ -321,12 +322,14 @@ func (v *VoiceConnection) open() (err error) {
 	}
 	data := voiceHandshakeOp{0, voiceHandshakeData{v.GuildID, v.UserID, v.sessionID, v.token}}
 
+	v.log(LogInformational, "Writing JSON")
 	err = v.wsConn.WriteJSON(data)
 	if err != nil {
 		v.log(LogWarning, "error sending init packet, %s", err)
 		return
 	}
 
+	v.log(LogInformational, "Setting v.close")
 	v.close = make(chan struct{})
 	go v.wsListen(v.wsConn, v.close)
 
