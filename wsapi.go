@@ -698,6 +698,7 @@ func (s *Session) onVoiceServerUpdate(st *VoiceServerUpdate) {
 	s.RLock()
 	voice, exists := s.VoiceConnections[st.GuildID]
 	s.RUnlock()
+	s.log(LogInformational, "Acquired first lock")
 
 	// If no VoiceConnection exists, just skip this
 	if !exists {
@@ -707,16 +708,20 @@ func (s *Session) onVoiceServerUpdate(st *VoiceServerUpdate) {
 	// If currently connected to voice ws/udp, then disconnect.
 	// Has no effect if not connected.
 	voice.Close()
+	s.log(LogInformational, "Closed voice socket")
 
 	// Store values for later use
 	voice.Lock()
+	s.log(LogInformational, "Acquired second lock")
 	voice.token = st.Token
 	voice.endpoint = st.Endpoint
 	voice.GuildID = st.GuildID
 	voice.Unlock()
+	s.log(LogInformational, "Released second lock")
 
 	// Open a connection to the voice server
 	err := voice.open()
+	s.log(LogInformational, "Opened voice connection")
 	if err != nil {
 		s.log(LogError, "onVoiceServerUpdate voice.open, %s", err)
 	}
