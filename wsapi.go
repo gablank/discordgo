@@ -720,6 +720,7 @@ func (s *Session) onVoiceServerUpdate(st *VoiceServerUpdate) {
 	s.log(LogInformational, "Released second lock")
 
 	// Open a connection to the voice server
+	voice.LogLevel = LogDebug
 	err := voice.open()
 	s.log(LogInformational, "Opened voice connection")
 	if err != nil {
